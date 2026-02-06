@@ -6,6 +6,7 @@ import { LogEntry } from '../store/gameStore';
 interface Message {
   role: 'user' | 'assistant' | 'system';
   content: string;
+  choices?: string[];
 }
 
 interface TerminalProps {
@@ -95,6 +96,21 @@ export function Terminal({ history, logs, onSendMessage, isProcessing }: Termina
                   {msg.role === 'user' ? '>' : msg.role === 'system' ? '#' : '$'}
                 </span>
                 {msg.content}
+                
+                {/* Display choices if available and it's the latest assistant message */}
+                {msg.role === 'assistant' && msg.choices && idx === history.length - 1 && !isProcessing && (
+                  <div className="mt-2 pl-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {msg.choices.map((choice, cIdx) => (
+                      <button
+                        key={cIdx}
+                        onClick={() => onSendMessage(choice)}
+                        className="text-left text-xs px-3 py-2 border border-green-800 rounded hover:bg-green-900/50 hover:border-green-500 transition-colors text-green-300"
+                      >
+                        {cIdx + 1}. {choice}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
             

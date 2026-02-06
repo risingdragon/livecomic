@@ -4,6 +4,7 @@ import { Message } from '../store/gameStore';
 export interface AIResponse {
   text: string;
   visual_prompt: string;
+  choices: string[];
 }
 
 const getApiKey = (userKey?: string) => {
@@ -42,7 +43,8 @@ export async function chatWithAI(history: Message[], userApiKey?: string): Promi
 
     return {
       text: mockText,
-      visual_prompt: mockVisual
+      visual_prompt: mockVisual,
+      choices: ["检查设置", "重试连接", "查看状态", "等待信号"]
     };
   }
 
@@ -62,18 +64,21 @@ If the Host mentions fantasy, magic, or medieval elements, adapt your tone and v
 If the Host mentions cyberpunk or sci-fi, stick to the original setting.
 
 IMPORTANT: 
-1. You must respond in JSON format with exactly two fields: "text" and "visual_prompt".
+1. You must respond in JSON format with exactly three fields: "text", "visual_prompt", and "choices".
 2. Your "text" response to the player MUST BE IN CHINESE (Simplified Chinese).
 3. Your "visual_prompt" must remain in English for the image generator.
+4. "choices" must be an array of 3-4 short, actionable options (in Chinese) for the player to choose from, based on the current situation.
 
 Format example:
 {
   "text": "我已经用周围的废料搭建了一个临时避难所。",
-  "visual_prompt": "A makeshift shelter made of scrap metal in a rocky wasteland, sci-fi concept art"
+  "visual_prompt": "A makeshift shelter made of scrap metal in a rocky wasteland, sci-fi concept art",
+  "choices": ["寻找水源", "加固避难所", "探索周围废墟", "检查库存"]
 }
 
 Keep your "text" immersive, slightly robotic but loyal.
 Keep your "visual_prompt" descriptive, focusing on the visual elements, lighting, and style.
+Keep your "choices" concise and relevant to gameplay progression.
     `;
 
     const completion = await openai.chat.completions.create({

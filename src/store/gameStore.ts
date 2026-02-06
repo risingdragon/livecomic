@@ -4,6 +4,7 @@ import { persist } from 'zustand/middleware';
 export interface Message {
   role: 'user' | 'assistant' | 'system';
   content: string;
+  choices?: string[];
 }
 
 export interface LogEntry {

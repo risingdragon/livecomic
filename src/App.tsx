@@ -52,7 +52,11 @@ function App() {
       });
 
       // 3. Update State with AI response
-      addMessage({ role: 'assistant', content: response.text });
+      addMessage({ 
+        role: 'assistant', 
+        content: response.text,
+        choices: response.choices
+      });
       
       // 4. Generate Image
       addLog('info', 'Generating image...', { prompt: response.visual_prompt });
