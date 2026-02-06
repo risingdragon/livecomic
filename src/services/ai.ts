@@ -11,14 +11,14 @@ const getApiKey = (userKey?: string) => {
 };
 
 const getBaseUrl = (apiKey?: string) => {
-    // If using local env key, use proxy to avoid CORS in dev
-    if (!apiKey && import.meta.env.VITE_DASHSCOPE_API_KEY) {
-        return '/dashscope-api/compatible-mode/v1';
-    }
-    // For BYOK in production (Vercel), we also need to use the proxy path
+    // OpenAI SDK expects a full URL when running in browser environments
+    // or it might try to parse relative paths incorrectly.
+    // We construct a full URL using the current origin.
+    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+    
+    // For BYOK in production (Vercel) and Dev, we use the proxy path
     // because browser direct calls to DashScope will fail CORS.
-    // Our vercel.json rewrites /dashscope-api/* to https://dashscope.aliyuncs.com/*
-    return '/dashscope-api/compatible-mode/v1';
+    return `${origin}/dashscope-api/compatible-mode/v1`;
 };
 
 export async function chatWithAI(history: Message[], userApiKey?: string): Promise<AIResponse> {
@@ -104,6 +104,7 @@ export async function generateImageUrl(prompt: string, userApiKey?: string): Pro
     // 1. vite.config.ts (in dev) -> proxies to https://dashscope.aliyuncs.com
     // 2. vercel.json (in prod) -> rewrites to https://dashscope.aliyuncs.com
     // This solves CORS issues for both dev and prod (BYOK)
+    // We use a relative path here because fetch supports it natively
     const baseUrl = '/dashscope-api';
     
     const response = await fetch(`${baseUrl}/api/v1/services/aigc/text2image/image-synthesis`, {
