@@ -15,11 +15,10 @@ const getBaseUrl = (apiKey?: string) => {
     if (!apiKey && import.meta.env.VITE_DASHSCOPE_API_KEY) {
         return '/dashscope-api/compatible-mode/v1';
     }
-    // If user provided key (production/Vercel), use direct URL
-    // Note: Direct URL from browser might have CORS issues if DashScope doesn't support it directly.
-    // However, DashScope compatible-mode usually supports CORS. 
-    // If not, we might need a Vercel Rewrite rule for production too.
-    return 'https://dashscope.aliyuncs.com/compatible-mode/v1';
+    // For BYOK in production (Vercel), we also need to use the proxy path
+    // because browser direct calls to DashScope will fail CORS.
+    // Our vercel.json rewrites /dashscope-api/* to https://dashscope.aliyuncs.com/*
+    return '/dashscope-api/compatible-mode/v1';
 };
 
 export async function chatWithAI(history: Message[], userApiKey?: string): Promise<AIResponse> {
@@ -101,26 +100,11 @@ export async function generateImageUrl(prompt: string, userApiKey?: string): Pro
 
   try {
     // Determine Base URL
-    // If local dev with proxy, use /dashscope-api
-    // If production (Vercel) with user key, we need to try direct access or use Vercel rewrite
-    // For now, let's assume we use direct URL for user keys, but DashScope image generation 
-    // endpoint might have CORS issues. 
-    // Ideally Vercel rewrites should handle this for production too.
-    
-    // Simple logic: if userApiKey provided, assume direct or let's use a standard variable
-    let baseUrl = 'https://dashscope.aliyuncs.com';
-    
-    // If we are in dev and using env key, use proxy
-    if (!userApiKey && import.meta.env.VITE_DASHSCOPE_API_KEY) {
-        baseUrl = '/dashscope-api';
-    } else {
-        // In production on Vercel, we should also use a rewrite to avoid CORS
-        // We will assume the Vercel project is configured with a rewrite to /dashscope-api 
-        // OR we try direct. DashScope Image API DOES NOT support CORS from browser usually.
-        // So we MUST rely on Vercel Rewrites or Proxy.
-        // Let's assume the user will configure Vercel Rewrites (vercel.json)
-        baseUrl = '/dashscope-api'; 
-    }
+    // Always use the proxy path '/dashscope-api' which is handled by:
+    // 1. vite.config.ts (in dev) -> proxies to https://dashscope.aliyuncs.com
+    // 2. vercel.json (in prod) -> rewrites to https://dashscope.aliyuncs.com
+    // This solves CORS issues for both dev and prod (BYOK)
+    const baseUrl = '/dashscope-api';
     
     const response = await fetch(`${baseUrl}/api/v1/services/aigc/text2image/image-synthesis`, {
       method: "POST",
