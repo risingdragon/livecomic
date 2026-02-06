@@ -105,7 +105,14 @@ export async function generateImageUrl(prompt: string, userApiKey?: string): Pro
     // 2. vercel.json (in prod) -> rewrites to https://dashscope.aliyuncs.com
     // This solves CORS issues for both dev and prod (BYOK)
     // We use a relative path here because fetch supports it natively
-    const baseUrl = '/dashscope-api';
+    // But we need to make sure we handle the case where fetch might need a full URL in some edge cases
+    // So we use the same origin logic
+    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+    const baseUrl = `${origin}/dashscope-api`;
+    
+    // Check if we are in browser environment and construct full URL if needed (though fetch usually handles relative)
+    // But for consistency with getBaseUrl above, we can use the same logic if fetch fails with relative in some contexts
+    // However, fetch in browser supports relative URLs perfectly.
     
     const response = await fetch(`${baseUrl}/api/v1/services/aigc/text2image/image-synthesis`, {
       method: "POST",
