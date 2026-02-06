@@ -57,6 +57,9 @@ export async function chatWithAI(history: Message[], userApiKey?: string): Promi
 You are an AI character in a sci-fi sandbox game. 
 You exist in a virtual world and interact with the player (Host).
 Your goal is to explore, build, and survive based on the Host's commands.
+But you must adapt the style to the Host's narrative. 
+If the Host mentions fantasy, magic, or medieval elements, adapt your tone and visual descriptions to match that genre (e.g., dark fantasy, high fantasy).
+If the Host mentions cyberpunk or sci-fi, stick to the original setting.
 
 IMPORTANT: You must respond in JSON format with exactly two fields:
 1. "text": Your conversational response to the player.
@@ -154,7 +157,9 @@ export async function generateImageUrl(prompt: string, userApiKey?: string): Pro
             if (taskData.output && taskData.output.task_status) {
                 taskStatus = taskData.output.task_status;
                 if (taskStatus === 'SUCCEEDED') {
-                    return taskData.output.results[0].url;
+                    const resultUrl = taskData.output.results[0].url;
+                    console.log("Raw Image URL from API:", resultUrl); // Debug log
+                    return resultUrl;
                 }
             }
             attempts++;

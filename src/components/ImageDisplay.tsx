@@ -12,13 +12,18 @@ export function ImageDisplay({ imageUrl, isLoading }: ImageDisplayProps) {
 
   useEffect(() => {
     if (imageUrl) {
+      console.log("Loading image:", imageUrl); // Debug log
       setIsImageLoaded(false);
       // Small delay to trigger fade effect
       const img = new Image();
       img.src = imageUrl;
       img.onload = () => {
+        console.log("Image loaded successfully:", imageUrl); // Debug log
         setDisplayUrl(imageUrl);
         setIsImageLoaded(true);
+      };
+      img.onerror = (e) => {
+        console.error("Failed to load image:", imageUrl, e); // Debug log
       };
     }
   }, [imageUrl]);
