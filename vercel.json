@@ -5,9 +5,6 @@
       "destination": "https://dashscope.aliyuncs.com/:path*"
     },
     {
-      "handle": "filesystem"
-    },
-    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
