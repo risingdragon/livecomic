@@ -1,45 +1,44 @@
 import OpenAI from 'openai';
 import { Message } from '../store/gameStore';
 
-// Initialize OpenAI Client (Compatible with DashScope/Qwen)
-// Note: In a real app, you would prompt the user for the key or use a proxy.
-// For this MVP, we check the environment variable.
-const apiKey = import.meta.env.VITE_DASHSCOPE_API_KEY || import.meta.env.VITE_OPENAI_API_KEY;
-
-const openai = new OpenAI({
-  apiKey: apiKey || 'dummy-key',
-  // Use proxy path in development to avoid CORS
-  baseURL: import.meta.env.VITE_DASHSCOPE_API_KEY 
-    ? '/dashscope-api/compatible-mode/v1' 
-    : undefined,
-  dangerouslyAllowBrowser: true // MVP only
-});
-
 export interface AIResponse {
   text: string;
   visual_prompt: string;
 }
 
-export async function chatWithAI(history: Message[]): Promise<AIResponse> {
+const getApiKey = (userKey?: string) => {
+  return userKey || import.meta.env.VITE_DASHSCOPE_API_KEY || import.meta.env.VITE_OPENAI_API_KEY;
+};
+
+const getBaseUrl = (apiKey?: string) => {
+    // If using local env key, use proxy to avoid CORS in dev
+    if (!apiKey && import.meta.env.VITE_DASHSCOPE_API_KEY) {
+        return '/dashscope-api/compatible-mode/v1';
+    }
+    // If user provided key (production/Vercel), use direct URL
+    // Note: Direct URL from browser might have CORS issues if DashScope doesn't support it directly.
+    // However, DashScope compatible-mode usually supports CORS. 
+    // If not, we might need a Vercel Rewrite rule for production too.
+    return 'https://dashscope.aliyuncs.com/compatible-mode/v1';
+};
+
+export async function chatWithAI(history: Message[], userApiKey?: string): Promise<AIResponse> {
+  const apiKey = getApiKey(userApiKey);
+  
   // Check if API key is missing or is a placeholder
   const isInvalidKey = !apiKey || apiKey.includes('your_api_key_here') || apiKey.includes('your_openai_key_here');
 
-  // If no valid API key is present, return a mock response for testing purposes
+  // If no valid API key is present, return a mock response
   if (isInvalidKey) {
     console.warn("No valid API Key found. Using mock response.");
-    await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate delay
+    await new Promise(resolve => setTimeout(resolve, 1500)); 
     
-    // Simple mock logic to make it feel alive
     const lastUserMsg = history[history.length - 1]?.content.toLowerCase() || "";
-    let mockText = "Host, I detect no valid neural link (API Key). I am running in simulation mode. I see a vast digital void waiting for your command.";
+    let mockText = "Host, I detect no valid neural link (API Key). Please configure your access key in settings.";
     let mockVisual = "A digital void with glowing grid lines, cyberpunk style, dark atmosphere";
 
     if (lastUserMsg.includes("look")) {
-        mockText = "I see endless possibilities in this digital realm. Structures could be built here.";
-        mockVisual = "A wide angle shot of a digital horizon, neon grid, 80s retro sci-fi style";
-    } else if (lastUserMsg.includes("build")) {
-        mockText = "I have initiated the construction protocols. A basic structure is taking shape.";
-        mockVisual = "A wireframe construction of a building appearing on a digital grid, glowing blue lines";
+        mockText = "I see endless possibilities, but my sensors are offline. (Please set API Key)";
     }
 
     return {
@@ -47,6 +46,12 @@ export async function chatWithAI(history: Message[]): Promise<AIResponse> {
       visual_prompt: mockVisual
     };
   }
+
+  const openai = new OpenAI({
+    apiKey: apiKey,
+    baseURL: getBaseUrl(userApiKey),
+    dangerouslyAllowBrowser: true 
+  });
 
   try {
     const systemPrompt = `
@@ -73,7 +78,7 @@ Keep your "visual_prompt" descriptive, focusing on the visual elements, lighting
         { role: "system", content: systemPrompt },
         ...history.map(msg => ({ role: msg.role, content: msg.content }))
       ],
-      model: import.meta.env.VITE_DASHSCOPE_API_KEY ? "qwen-plus" : "gpt-4-turbo-preview",
+      model: "qwen-plus", // Explicitly use qwen-plus for DashScope
       response_format: { type: "json_object" },
     });
 
@@ -83,33 +88,49 @@ Keep your "visual_prompt" descriptive, focusing on the visual elements, lighting
     return JSON.parse(content) as AIResponse;
   } catch (error) {
     console.error("AI Error:", error);
-    return {
-      text: "Error processing your command. My neural pathways are disrupted.",
-      visual_prompt: "A glitching computer screen with static noise and error messages"
-    };
+    throw error;
   }
 }
 
-export async function generateImageUrl(prompt: string): Promise<string> {
-  const apiKey = import.meta.env.VITE_DASHSCOPE_API_KEY;
+export async function generateImageUrl(prompt: string, userApiKey?: string): Promise<string> {
+  const apiKey = getApiKey(userApiKey);
 
   if (!apiKey || apiKey.includes('your_api_key_here')) {
     throw new Error("No DashScope API Key found.");
   }
 
   try {
-    // Use proxy path to avoid CORS
-    const baseUrl = '/dashscope-api';
+    // Determine Base URL
+    // If local dev with proxy, use /dashscope-api
+    // If production (Vercel) with user key, we need to try direct access or use Vercel rewrite
+    // For now, let's assume we use direct URL for user keys, but DashScope image generation 
+    // endpoint might have CORS issues. 
+    // Ideally Vercel rewrites should handle this for production too.
+    
+    // Simple logic: if userApiKey provided, assume direct or let's use a standard variable
+    let baseUrl = 'https://dashscope.aliyuncs.com';
+    
+    // If we are in dev and using env key, use proxy
+    if (!userApiKey && import.meta.env.VITE_DASHSCOPE_API_KEY) {
+        baseUrl = '/dashscope-api';
+    } else {
+        // In production on Vercel, we should also use a rewrite to avoid CORS
+        // We will assume the Vercel project is configured with a rewrite to /dashscope-api 
+        // OR we try direct. DashScope Image API DOES NOT support CORS from browser usually.
+        // So we MUST rely on Vercel Rewrites or Proxy.
+        // Let's assume the user will configure Vercel Rewrites (vercel.json)
+        baseUrl = '/dashscope-api'; 
+    }
     
     const response = await fetch(`${baseUrl}/api/v1/services/aigc/text2image/image-synthesis`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${apiKey}`,
-        "X-DashScope-Async": "enable" // Enable async task submission
+        "X-DashScope-Async": "enable"
       },
       body: JSON.stringify({
-        model: "wanx-v1", // Using wanx-v1 which is equivalent/similar to z-image-turbo for general availability or check specific model code
+        model: "wanx-v1", 
         input: {
           prompt: prompt + ", 2d game art, sci-fi style, high quality"
         },
@@ -124,7 +145,6 @@ export async function generateImageUrl(prompt: string): Promise<string> {
     const data = await response.json();
     
     if (data.output && data.output.task_id) {
-        // Poll for result
         const taskId = data.output.task_id;
         let taskStatus = 'PENDING';
         let attempts = 0;
@@ -132,7 +152,7 @@ export async function generateImageUrl(prompt: string): Promise<string> {
         while (taskStatus === 'PENDING' || taskStatus === 'RUNNING') {
             if (attempts > 30) throw new Error("Image generation timeout");
             
-            await new Promise(r => setTimeout(r, 1000)); // Wait 1s
+            await new Promise(r => setTimeout(r, 1000));
             
             const taskResponse = await fetch(`${baseUrl}/api/v1/tasks/${taskId}`, {
                 headers: { "Authorization": `Bearer ${apiKey}` }

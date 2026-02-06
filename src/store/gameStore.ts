@@ -19,11 +19,13 @@ interface GameState {
   currentImageUrl?: string;
   currentVisualPrompt?: string;
   isProcessing: boolean;
+  apiKey?: string;
   
   addMessage: (message: Message) => void;
   addLog: (type: LogEntry['type'], message: string, details?: any) => void;
   setImage: (url: string, prompt: string) => void;
   setProcessing: (isProcessing: boolean) => void;
+  setApiKey: (key: string) => void;
   resetGame: () => void;
 }
 
@@ -35,6 +37,7 @@ export const useGameStore = create<GameState>()(
       currentImageUrl: undefined,
       currentVisualPrompt: undefined,
       isProcessing: false,
+      apiKey: undefined,
 
       addMessage: (message) => set((state) => ({ 
         history: [...state.history, message] 
@@ -51,13 +54,16 @@ export const useGameStore = create<GameState>()(
 
       setProcessing: (isProcessing) => set({ isProcessing }),
 
-      resetGame: () => set({ 
+      setApiKey: (key) => set({ apiKey: key }),
+
+      resetGame: () => set((state) => ({ 
         history: [], 
         logs: [],
         currentImageUrl: undefined, 
         currentVisualPrompt: undefined, 
-        isProcessing: false 
-      }),
+        isProcessing: false,
+        apiKey: state.apiKey // Keep API key on reset
+      })),
     }),
     {
       name: 'h5-sandbox-storage',
@@ -65,7 +71,8 @@ export const useGameStore = create<GameState>()(
         history: state.history, 
         logs: state.logs,
         currentImageUrl: state.currentImageUrl,
-        currentVisualPrompt: state.currentVisualPrompt
+        currentVisualPrompt: state.currentVisualPrompt,
+        apiKey: state.apiKey
       }), // Don't persist isProcessing
     }
   )
