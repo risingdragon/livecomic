@@ -47,7 +47,7 @@ function App() {
       const response = await chatWithAI(newHistory, apiKey);
       
       addLog('success', 'AI response received', { 
-        text_preview: response.text.substring(0, 50) + '...',
+        text_preview: (response.text || "").substring(0, 50) + '...',
         visual_prompt: response.visual_prompt 
       });
 

@@ -93,7 +93,12 @@ Keep your "choices" concise and relevant to gameplay progression.
     const content = completion.choices[0].message.content;
     if (!content) throw new Error("No content received from AI");
 
-    return JSON.parse(content) as AIResponse;
+    const parsed = JSON.parse(content);
+    return {
+      text: parsed.text || "System: Data corruption detected. Retrying stream...",
+      visual_prompt: parsed.visual_prompt || "static noise, glitch art, dark screen",
+      choices: parsed.choices || ["Retry Connection", "Check Status"]
+    } as AIResponse;
   } catch (error) {
     console.error("AI Error:", error);
     throw error;
