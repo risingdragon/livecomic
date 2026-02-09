@@ -96,10 +96,7 @@ function App() {
         />
         
         {/* Optional: Overlay info */}
-        <div className="absolute top-4 left-4 bg-black/50 p-2 rounded text-xs text-green-500 backdrop-blur-sm border border-green-900/50">
-          <div>VISUAL_FEED_ACTIVE</div>
-          <div className="opacity-70">CAM_01 // REMOTE_LINK</div>
-        </div>
+        {/* Removed as per user request */}
 
         {/* Settings Button */}
         <button 
