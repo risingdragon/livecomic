@@ -7,16 +7,18 @@ import { chatWithAI, generateImageUrl } from './services/ai';
 import { Settings } from 'lucide-react';
 
 function App() {
-  const { 
-    history, 
+  const {
+    history,
     logs,
-    addMessage, 
+    addMessage,
     addLog,
-    currentImageUrl, 
-    setImage, 
-    isProcessing, 
+    currentImageUrl,
+    setImage,
+    isProcessing,
     setProcessing,
-    apiKey
+    apiKey,
+    customAPIConfig,
+    useCustomAPI
   } = useGameStore();
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -26,10 +28,11 @@ function App() {
     if (history.length === 0) {
       addLog('info', 'System initialized');
     }
-    
+
     // Auto-open settings if no API Key found (both in env and local storage)
-    const hasEnvKey = import.meta.env.VITE_DASHSCOPE_API_KEY;
-    if (!hasEnvKey && !apiKey) {
+    const hasEnvKey = import.meta.env.VITE_DASHSCOPE_API_KEY || import.meta.env.VITE_GROK_API_KEY;
+    const hasCustomConfig = customAPIConfig?.baseUrl && customAPIConfig?.apiKey;
+    if (!hasEnvKey && !apiKey && !hasCustomConfig) {
       setIsSettingsOpen(true);
     }
   }, []);
@@ -44,42 +47,64 @@ function App() {
       // 2. Call AI
       addLog('info', 'Sending request to AI...');
       const newHistory = [...history, { role: 'user' as const, content }];
-      const response = await chatWithAI(newHistory, apiKey);
-      
-      addLog('success', 'AI response received', { 
+
+      // Use custom API config if enabled, otherwise use preset
+      const response = useCustomAPI
+        ? await chatWithAI(newHistory, undefined, customAPIConfig)
+        : await chatWithAI(newHistory, apiKey);
+
+      addLog('success', 'AI response received', {
         text_preview: (response.text || "").substring(0, 50) + '...',
-        visual_prompt: response.visual_prompt 
+        visual_prompt: response.visual_prompt
       });
 
       // 3. Update State with AI response
-      addMessage({ 
-        role: 'assistant', 
+      addMessage({
+        role: 'assistant',
         content: response.text,
         choices: response.choices
       });
-      
+
       // 4. Generate Image
       addLog('info', 'Generating image...', { prompt: response.visual_prompt });
-      
+
       try {
-        const imageUrl = await generateImageUrl(response.visual_prompt, apiKey);
-        
-        addLog('info', 'Image generation result', { 
+        const imageUrl = useCustomAPI
+          ? await generateImageUrl(response.visual_prompt, undefined, customAPIConfig)
+          : await generateImageUrl(response.visual_prompt, apiKey);
+
+        addLog('info', 'Image generation result', {
           url: imageUrl,
-          source: 'dashscope'
+          source: useCustomAPI ? 'custom' : 'preset'
         });
-        
+
         setImage(imageUrl, response.visual_prompt);
       } catch (imgError) {
-        addLog('error', 'Image generation failed', { error: String(imgError) });
+        const errorMsg = String(imgError);
+        console.error('Image generation failed:', imgError);
+
+        // 检查是否是 API 不支持图像生成
+        if (errorMsg.includes('could not generate an image') ||
+            errorMsg.includes('not supported') ||
+            errorMsg.includes('image generation') ||
+            errorMsg.includes('bad_response_body')) {
+          addLog('warning', '当前 API 不支持图像生成，继续文字游戏', { error: errorMsg });
+          // 使用一个占位图片或保持当前图片
+          addMessage({
+            role: 'system',
+            content: '[系统：当前 API 不支持图像生成，继续纯文字冒险]'
+          });
+        } else {
+          addLog('error', 'Image generation failed', { error: errorMsg });
+        }
       }
 
     } catch (error) {
       console.error("Game Loop Error:", error);
       addLog('error', 'Game loop error', { error: String(error) });
-      addMessage({ 
-        role: 'system', 
-        content: "CRITICAL ERROR: Connection lost. Retrying..." 
+      addMessage({
+        role: 'system',
+        content: "CRITICAL ERROR: Connection lost. Retrying..."
       });
     } finally {
       setProcessing(false);
