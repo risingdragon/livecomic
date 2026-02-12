@@ -17,14 +17,25 @@ export interface ModelConfig {
   apiKey: string;
 }
 
-export interface CustomAPIConfig {
+export interface ChatAPIConfig {
   baseUrl: string;
   apiKey: string;
   chatModel: string;
-  imageModel?: string;
 }
 
-const getModelConfig = (
+export interface ImageAPIConfig {
+  baseUrl: string;
+  apiKey: string;
+  imageModel: string;
+}
+
+export interface CustomAPIConfig {
+  chat: ChatAPIConfig;
+  image: ImageAPIConfig;
+  useSeparate: boolean;
+}
+
+const getChatModelConfig = (
   userKey?: string,
   customConfig?: CustomAPIConfig,
   provider?: AIModelProvider
@@ -32,21 +43,18 @@ const getModelConfig = (
   const origin = typeof window !== 'undefined' ? window.location.origin : '';
 
   // 如果提供了自定义配置，优先使用
-  if (customConfig?.baseUrl && customConfig?.apiKey) {
-    // 对于自定义 API，直接使用用户提供的完整 URL
-    // 如果 URL 是相对路径（以 / 开头），则添加 origin
-    let baseUrl = customConfig.baseUrl.replace(/\/$/, ''); // 移除末尾斜杠
+  if (customConfig?.chat?.baseUrl && customConfig?.chat?.apiKey) {
+    let baseUrl = customConfig.chat.baseUrl.replace(/\/$/, ''); // 移除末尾斜杠
     if (baseUrl.startsWith('/')) {
       baseUrl = `${origin}${baseUrl}`;
     }
-    // 如果用户错误地包含了 /chat/completions 路径，自动移除
     baseUrl = baseUrl.replace(/\/chat\/completions$/, '');
     return {
       provider: 'custom',
-      chatModel: customConfig.chatModel || 'gpt-3.5-turbo',
-      imageModel: customConfig.imageModel || '',
+      chatModel: customConfig.chat.chatModel || 'gpt-3.5-turbo',
+      imageModel: '',
       baseUrl,
-      apiKey: customConfig.apiKey
+      apiKey: customConfig.chat.apiKey
     };
   }
 
@@ -71,6 +79,64 @@ const getModelConfig = (
   };
 };
 
+const getImageModelConfig = (
+  userKey?: string,
+  customConfig?: CustomAPIConfig,
+  provider?: AIModelProvider
+): ModelConfig => {
+  const origin = typeof window !== 'undefined' ? window.location.origin : '';
+
+  // 如果提供了自定义配置，优先使用
+  if (customConfig?.useSeparate && customConfig?.image?.baseUrl && customConfig?.image?.apiKey) {
+    let baseUrl = customConfig.image.baseUrl.replace(/\/$/, ''); // 移除末尾斜杠
+    if (baseUrl.startsWith('/')) {
+      baseUrl = `${origin}${baseUrl}`;
+    }
+    return {
+      provider: 'custom',
+      chatModel: '',
+      imageModel: customConfig.image.imageModel || 'dall-e-3',
+      baseUrl,
+      apiKey: customConfig.image.apiKey
+    };
+  }
+
+  // 如果没有单独的图像配置，使用聊天配置
+  if (customConfig?.chat?.baseUrl && customConfig?.chat?.apiKey) {
+    let baseUrl = customConfig.chat.baseUrl.replace(/\/$/, '');
+    if (baseUrl.startsWith('/')) {
+      baseUrl = `${origin}${baseUrl}`;
+    }
+    return {
+      provider: 'custom',
+      chatModel: '',
+      imageModel: 'dall-e-3',
+      baseUrl,
+      apiKey: customConfig.chat.apiKey
+    };
+  }
+
+  const selectedProvider = provider || detectProvider(userKey);
+
+  if (selectedProvider === 'grok') {
+    return {
+      provider: 'grok',
+      chatModel: 'grok-2-1212',
+      imageModel: 'grok-2-image-1212',
+      baseUrl: `${origin}/grok-api/v1`,
+      apiKey: userKey || import.meta.env.VITE_GROK_API_KEY || ''
+    };
+  }
+
+  return {
+    provider: 'dashscope',
+    chatModel: 'qwen-plus',
+    imageModel: 'wanx-v1',
+    baseUrl: `${origin}/dashscope-api`,
+    apiKey: userKey || import.meta.env.VITE_DASHSCOPE_API_KEY || import.meta.env.VITE_OPENAI_API_KEY || ''
+  };
+};
+
 export const detectProvider = (apiKey?: string): AIModelProvider => {
   if (!apiKey) return 'dashscope';
   if (apiKey.startsWith('xai-')) return 'grok';
@@ -83,7 +149,7 @@ export async function chatWithAI(
   customConfig?: CustomAPIConfig,
   provider?: AIModelProvider
 ): Promise<AIResponse> {
-  const config = getModelConfig(userApiKey, customConfig, provider);
+  const config = getChatModelConfig(userApiKey, customConfig, provider);
 
   const isInvalidKey = !config.apiKey || config.apiKey.includes('your_api_key_here') || config.apiKey.includes('your_openai_key_here');
 
@@ -355,7 +421,7 @@ export async function generateImageUrl(
   customConfig?: CustomAPIConfig,
   provider?: AIModelProvider
 ): Promise<string> {
-  const config = getModelConfig(userApiKey, customConfig, provider);
+  const config = getImageModelConfig(userApiKey, customConfig, provider);
 
   if (!config.apiKey || config.apiKey.includes('your_api_key_here')) {
     throw new Error("No API Key found.");

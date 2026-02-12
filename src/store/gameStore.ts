@@ -14,11 +14,22 @@ export interface LogEntry {
   details?: any;
 }
 
-export interface CustomAPIConfig {
+export interface ChatAPIConfig {
   baseUrl: string;
   apiKey: string;
   chatModel: string;
-  imageModel?: string;
+}
+
+export interface ImageAPIConfig {
+  baseUrl: string;
+  apiKey: string;
+  imageModel: string;
+}
+
+export interface CustomAPIConfig {
+  chat: ChatAPIConfig;
+  image: ImageAPIConfig;
+  useSeparate: boolean;
 }
 
 interface GameState {
@@ -50,7 +61,19 @@ export const useGameStore = create<GameState>()(
       currentVisualPrompt: undefined,
       isProcessing: false,
       apiKey: undefined,
-      customAPIConfig: undefined,
+      customAPIConfig: {
+        chat: {
+          baseUrl: '',
+          apiKey: '',
+          chatModel: 'gpt-3.5-turbo'
+        },
+        image: {
+          baseUrl: '',
+          apiKey: '',
+          imageModel: 'dall-e-3'
+        },
+        useSeparate: false
+      },
       useCustomAPI: false,
 
       addMessage: (message) => set((state) => ({
