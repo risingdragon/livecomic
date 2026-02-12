@@ -17,6 +17,18 @@ export interface ModelConfig {
   apiKey: string;
 }
 
+const isMobile = (): boolean => {
+  if (typeof window === 'undefined') return false;
+  return window.innerWidth <= 768;
+};
+
+const getImageSize = (): { width: number; height: number } => {
+  if (isMobile()) {
+    return { width: 720, height: 1280 };
+  }
+  return { width: 1280, height: 720 };
+};
+
 export interface ChatAPIConfig {
   baseUrl: string;
   apiKey: string;
@@ -249,6 +261,7 @@ Keep your "choices" concise and relevant to gameplay progression.
 }
 
 async function generateDashScopeImage(prompt: string, apiKey: string, baseUrl: string): Promise<string> {
+  const size = getImageSize();
   const response = await fetch(`${baseUrl}/api/v1/services/aigc/text2image/image-synthesis`, {
     method: "POST",
     headers: {
@@ -259,11 +272,11 @@ async function generateDashScopeImage(prompt: string, apiKey: string, baseUrl: s
     body: JSON.stringify({
       model: "wanx-v1",
       input: {
-        prompt: prompt + ", 2d game art, sci-fi style, high quality"
+        prompt: prompt + ", 2d game art, high quality"
       },
       parameters: {
         style: "<auto>",
-        size: "1280*720",
+        size: `${size.width}*${size.height}`,
         n: 1
       }
     })
@@ -304,6 +317,7 @@ async function generateDashScopeImage(prompt: string, apiKey: string, baseUrl: s
 }
 
 async function generateGrokImage(prompt: string, apiKey: string, baseUrl: string): Promise<string> {
+  const size = getImageSize();
   const response = await fetch(`${baseUrl}/images/generations`, {
     method: "POST",
     headers: {
@@ -312,9 +326,9 @@ async function generateGrokImage(prompt: string, apiKey: string, baseUrl: string
     },
     body: JSON.stringify({
       model: "grok-2-image-1212",
-      prompt: prompt + ", 2d game art, sci-fi style, high quality",
+      prompt: prompt + ", 2d game art, high quality",
       n: 1,
-      size: "1280x720"
+      size: `${size.width}x${size.height}`
     })
   });
 
@@ -334,17 +348,18 @@ async function generateGrokImage(prompt: string, apiKey: string, baseUrl: string
 }
 
 async function generateCustomImage(prompt: string, config: ModelConfig): Promise<string> {
-  // 对于自定义 API，尝试使用 OpenAI 兼容的图像生成接口
+  const size = getImageSize();
   const imageUrl = `${config.baseUrl}/images/generations`;
   console.log("Generating image with custom API:", imageUrl);
   console.log("Using model:", config.imageModel || 'dall-e-3');
   console.log("Prompt:", prompt);
+  console.log("Size:", `${size.width}x${size.height}`, isMobile() ? '(mobile/portrait)' : '(desktop/landscape)');
 
-  // 尝试不同的参数组合
   const requestBody: any = {
     model: config.imageModel || 'dall-e-3',
     prompt: prompt,
-    n: 1
+    n: 1,
+    size: `${size.width}x${size.height}`
   };
 
   console.log("Request body:", JSON.stringify(requestBody));
