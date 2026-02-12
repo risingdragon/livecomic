@@ -4,7 +4,7 @@ import { ImageDisplay } from './components/ImageDisplay';
 import { SettingsModal } from './components/SettingsModal';
 import { useGameStore } from './store/gameStore';
 import { chatWithAI, generateImageUrl } from './services/ai';
-import { ChevronUp, ChevronDown } from 'lucide-react';
+import { ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 
 function App() {
   const {
@@ -122,14 +122,25 @@ function App() {
         />
       </div>
 
-      {/* Desktop: Side-by-side layout */}
-      <div className="hidden md:flex h-full w-full">
-        {/* Left: 70% Image Display */}
-        <div className="w-[70%] h-full relative border-r border-gray-700">
-        </div>
+      {/* Desktop: Sliding Terminal Panel */}
+      <div 
+        className={`hidden md:block fixed top-0 right-0 h-full z-20 transition-transform duration-300 ease-in-out ${
+          isTerminalVisible ? 'translate-x-0' : 'translate-x-full'
+        }`}
+        style={{ width: '30%', minWidth: '300px' }}
+      >
+        {/* Toggle Button */}
+        <button
+          onClick={() => setIsTerminalVisible(!isTerminalVisible)}
+          className="absolute -left-10 top-1/2 -translate-y-1/2 bg-black/70 backdrop-blur-sm px-2 py-4 rounded-l-lg border border-gray-700 border-r-0 text-gray-400 hover:text-white transition-colors flex flex-col items-center gap-1"
+          aria-label={isTerminalVisible ? '隐藏终端' : '显示终端'}
+        >
+          {isTerminalVisible ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+          <span className="text-xs writing-mode-vertical">{isTerminalVisible ? '隐藏' : '显示'}</span>
+        </button>
 
-        {/* Right: 30% Terminal */}
-        <div className="w-[30%] h-full min-w-[300px] bg-black/80 backdrop-blur-sm">
+        {/* Terminal Panel */}
+        <div className="h-full bg-black/80 backdrop-blur-sm border-l border-gray-700">
           <Terminal 
             history={history} 
             logs={logs}
@@ -139,6 +150,17 @@ function App() {
           />
         </div>
       </div>
+
+      {/* Desktop: Floating toggle button when terminal is hidden */}
+      {!isTerminalVisible && (
+        <button
+          onClick={() => setIsTerminalVisible(true)}
+          className="hidden md:flex fixed top-1/2 right-4 -translate-y-1/2 z-30 bg-black/70 backdrop-blur-sm p-3 rounded-full border border-gray-700 text-gray-400 hover:text-white transition-colors items-center justify-center"
+          aria-label="显示终端"
+        >
+          <ChevronLeft size={20} />
+        </button>
+      )}
 
       {/* Mobile: Overlay Terminal Panel */}
       <div 
