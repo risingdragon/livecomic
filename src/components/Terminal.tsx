@@ -40,9 +40,9 @@ export function Terminal({ history, logs, onSendMessage, isProcessing, onOpenSet
   };
 
   return (
-    <div className="flex flex-col h-full bg-black border-l border-gray-700 font-mono text-sm">
+    <div className="flex flex-col h-full font-mono text-sm">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-2 bg-gray-900 border-b border-gray-800 text-green-500">
+      <div className="flex items-center justify-between px-4 py-2 bg-gray-900/80 border-b border-gray-800 text-green-500">
         <div className="flex gap-4">
           <button 
             onClick={() => setActiveTab('chat')}
@@ -156,7 +156,7 @@ export function Terminal({ history, logs, onSendMessage, isProcessing, onOpenSet
 
       {/* Input Area (Only for chat) */}
       {activeTab === 'chat' && (
-        <form onSubmit={handleSubmit} className="p-4 bg-gray-900 border-t border-gray-800 flex gap-2">
+        <form onSubmit={handleSubmit} className="p-4 bg-gray-900/80 border-t border-gray-800 flex gap-2">
           <span className="text-blue-400 py-2">&gt;</span>
           <input
             type="text"
@@ -179,7 +179,7 @@ export function Terminal({ history, logs, onSendMessage, isProcessing, onOpenSet
       
       {/* Log Controls (Only for logs) */}
       {activeTab === 'logs' && (
-        <div className="p-2 bg-gray-900 border-t border-gray-800 flex justify-end">
+        <div className="p-2 bg-gray-900/80 border-t border-gray-800 flex justify-end">
            <div className="text-xs text-gray-500 px-2">
              Auto-scrolling enabled
            </div>

@@ -4,6 +4,7 @@ import { ImageDisplay } from './components/ImageDisplay';
 import { SettingsModal } from './components/SettingsModal';
 import { useGameStore } from './store/gameStore';
 import { chatWithAI, generateImageUrl } from './services/ai';
+import { ChevronUp, ChevronDown } from 'lucide-react';
 
 function App() {
   const {
@@ -21,6 +22,7 @@ function App() {
   } = useGameStore();
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isTerminalVisible, setIsTerminalVisible] = useState(true);
 
   // Initial welcome message if history is empty
   useEffect(() => {
@@ -111,25 +113,72 @@ function App() {
   };
 
   return (
-    <div className="flex h-screen w-screen bg-game-bg overflow-hidden text-white font-mono">
-      {/* Left: 70% Image Display */}
-      <div className="w-[70%] h-full relative border-r border-gray-700">
+    <div className="relative h-screen w-screen bg-game-bg overflow-hidden text-white font-mono">
+      {/* Background: Full screen Image Display */}
+      <div className="absolute inset-0">
         <ImageDisplay 
           imageUrl={currentImageUrl} 
           isLoading={isProcessing} 
         />
       </div>
 
-      {/* Right: 30% Terminal */}
-      <div className="w-[30%] h-full min-w-[300px]">
-        <Terminal 
-          history={history} 
-          logs={logs}
-          onSendMessage={handleSendMessage} 
-          isProcessing={isProcessing}
-          onOpenSettings={() => setIsSettingsOpen(true)}
-        />
+      {/* Desktop: Side-by-side layout */}
+      <div className="hidden md:flex h-full w-full">
+        {/* Left: 70% Image Display */}
+        <div className="w-[70%] h-full relative border-r border-gray-700">
+        </div>
+
+        {/* Right: 30% Terminal */}
+        <div className="w-[30%] h-full min-w-[300px] bg-black/80 backdrop-blur-sm">
+          <Terminal 
+            history={history} 
+            logs={logs}
+            onSendMessage={handleSendMessage} 
+            isProcessing={isProcessing}
+            onOpenSettings={() => setIsSettingsOpen(true)}
+          />
+        </div>
       </div>
+
+      {/* Mobile: Overlay Terminal Panel */}
+      <div 
+        className={`md:hidden fixed bottom-0 left-0 right-0 z-20 transition-transform duration-300 ease-in-out ${
+          isTerminalVisible ? 'translate-y-0' : 'translate-y-full'
+        }`}
+        style={{ height: '35vh' }}
+      >
+        {/* Toggle Button */}
+        <button
+          onClick={() => setIsTerminalVisible(!isTerminalVisible)}
+          className="absolute -top-10 left-1/2 -translate-x-1/2 bg-black/70 backdrop-blur-sm px-4 py-1 rounded-t-lg border border-gray-700 border-b-0 text-gray-400 hover:text-white transition-colors flex items-center gap-1"
+          aria-label={isTerminalVisible ? '隐藏终端' : '显示终端'}
+        >
+          {isTerminalVisible ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
+          <span className="text-xs">{isTerminalVisible ? '隐藏' : '显示'}</span>
+        </button>
+
+        {/* Terminal Panel */}
+        <div className="h-full bg-black/70 backdrop-blur-sm border-t border-gray-700">
+          <Terminal 
+            history={history} 
+            logs={logs}
+            onSendMessage={handleSendMessage} 
+            isProcessing={isProcessing}
+            onOpenSettings={() => setIsSettingsOpen(true)}
+          />
+        </div>
+      </div>
+
+      {/* Mobile: Floating toggle button when terminal is hidden */}
+      {!isTerminalVisible && (
+        <button
+          onClick={() => setIsTerminalVisible(true)}
+          className="md:hidden fixed bottom-4 right-4 z-30 bg-black/70 backdrop-blur-sm p-3 rounded-full border border-gray-700 text-gray-400 hover:text-white transition-colors"
+          aria-label="显示终端"
+        >
+          <ChevronUp size={20} />
+        </button>
+      )}
 
       <SettingsModal 
         isOpen={isSettingsOpen} 
