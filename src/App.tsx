@@ -151,17 +151,6 @@ function App() {
         </div>
       </div>
 
-      {/* Desktop: Floating toggle button when terminal is hidden */}
-      {!isTerminalVisible && (
-        <button
-          onClick={() => setIsTerminalVisible(true)}
-          className="hidden md:flex fixed top-1/2 right-4 -translate-y-1/2 z-30 bg-black/70 backdrop-blur-sm p-3 rounded-full border border-gray-700 text-gray-400 hover:text-white transition-colors items-center justify-center"
-          aria-label="显示终端"
-        >
-          <ChevronLeft size={20} />
-        </button>
-      )}
-
       {/* Mobile: Overlay Terminal Panel */}
       <div 
         className={`md:hidden fixed bottom-0 left-0 right-0 z-20 transition-transform duration-300 ease-in-out ${
@@ -190,17 +179,6 @@ function App() {
           />
         </div>
       </div>
-
-      {/* Mobile: Floating toggle button when terminal is hidden */}
-      {!isTerminalVisible && (
-        <button
-          onClick={() => setIsTerminalVisible(true)}
-          className="md:hidden fixed bottom-4 right-4 z-30 bg-black/70 backdrop-blur-sm p-3 rounded-full border border-gray-700 text-gray-400 hover:text-white transition-colors"
-          aria-label="显示终端"
-        >
-          <ChevronUp size={20} />
-        </button>
-      )}
 
       <SettingsModal 
         isOpen={isSettingsOpen} 
