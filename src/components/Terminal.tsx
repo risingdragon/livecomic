@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { cn } from '../lib/utils';
-import { Send, Terminal as TerminalIcon, Activity } from 'lucide-react';
+import { Send, Terminal as TerminalIcon, Activity, Settings } from 'lucide-react';
 import { LogEntry } from '../store/gameStore';
 
 interface Message {
@@ -14,9 +14,10 @@ interface TerminalProps {
   logs: LogEntry[];
   onSendMessage: (message: string) => void;
   isProcessing: boolean;
+  onOpenSettings: () => void;
 }
 
-export function Terminal({ history, logs, onSendMessage, isProcessing }: TerminalProps) {
+export function Terminal({ history, logs, onSendMessage, isProcessing, onOpenSettings }: TerminalProps) {
   const [input, setInput] = useState('');
   const [activeTab, setActiveTab] = useState<'chat' | 'logs'>('chat');
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -65,6 +66,13 @@ export function Terminal({ history, logs, onSendMessage, isProcessing }: Termina
           </button>
         </div>
         <div className="flex gap-2 items-center">
+           <button
+             onClick={onOpenSettings}
+             className="text-gray-500 hover:text-white transition-colors p-1"
+             title="Configure API Key"
+           >
+             <Settings size={14} />
+           </button>
            <span className="text-xs opacity-50">{activeTab === 'chat' ? 'ONLINE' : 'MONITORING'}</span>
            <span className={cn(
              "w-2 h-2 rounded-full animate-pulse",

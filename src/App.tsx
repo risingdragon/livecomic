@@ -4,7 +4,6 @@ import { ImageDisplay } from './components/ImageDisplay';
 import { SettingsModal } from './components/SettingsModal';
 import { useGameStore } from './store/gameStore';
 import { chatWithAI, generateImageUrl } from './services/ai';
-import { Settings } from 'lucide-react';
 
 function App() {
   const {
@@ -119,18 +118,6 @@ function App() {
           imageUrl={currentImageUrl} 
           isLoading={isProcessing} 
         />
-        
-        {/* Optional: Overlay info */}
-        {/* Removed as per user request */}
-
-        {/* Settings Button */}
-        <button 
-          onClick={() => setIsSettingsOpen(true)}
-          className="absolute top-4 right-4 bg-black/50 p-2 rounded text-gray-400 hover:text-white backdrop-blur-sm border border-gray-800 hover:border-gray-500 transition-all z-10"
-          title="Configure API Key"
-        >
-          <Settings size={20} />
-        </button>
       </div>
 
       {/* Right: 30% Terminal */}
@@ -139,7 +126,8 @@ function App() {
           history={history} 
           logs={logs}
           onSendMessage={handleSendMessage} 
-          isProcessing={isProcessing} 
+          isProcessing={isProcessing}
+          onOpenSettings={() => setIsSettingsOpen(true)}
         />
       </div>
 
