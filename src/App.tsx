@@ -32,7 +32,7 @@ function App() {
 
     // Auto-open settings if no API Key found (both in env and local storage)
     const hasEnvKey = import.meta.env.VITE_DASHSCOPE_API_KEY || import.meta.env.VITE_GROK_API_KEY;
-    const hasCustomConfig = customAPIConfig?.baseUrl && customAPIConfig?.apiKey;
+    const hasCustomConfig = customAPIConfig?.chat?.baseUrl && customAPIConfig?.chat?.apiKey;
     if (!hasEnvKey && !apiKey && !hasCustomConfig) {
       setIsSettingsOpen(true);
     }
