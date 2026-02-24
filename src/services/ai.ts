@@ -84,7 +84,7 @@ const getChatModelConfig = (
 
   return {
     provider: 'dashscope',
-    chatModel: 'qwen-plus',
+    chatModel: 'qwen-turbo',
     imageModel: 'wanx-v1',
     baseUrl: `${origin}/dashscope-api/compatible-mode/v1`,
     apiKey: userKey || import.meta.env.VITE_DASHSCOPE_API_KEY || import.meta.env.VITE_OPENAI_API_KEY || ''
@@ -142,7 +142,7 @@ const getImageModelConfig = (
 
   return {
     provider: 'dashscope',
-    chatModel: 'qwen-plus',
+    chatModel: 'qwen-turbo',
     imageModel: 'wanx-v1',
     baseUrl: `${origin}/dashscope-api`,
     apiKey: userKey || import.meta.env.VITE_DASHSCOPE_API_KEY || import.meta.env.VITE_OPENAI_API_KEY || ''

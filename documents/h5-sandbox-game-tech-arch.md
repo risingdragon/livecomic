@@ -59,7 +59,7 @@ POST https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions
 | 参数名 | 参数类型 | 是否必需 | 描述 |
 |-----------|-------------|-------------|-------------|
 | messages | array | true | 对话历史消息 |
-| model | string | true | 模型名称（qwen-plus） |
+| model | string | true | 模型名称（qwen-turbo） |
 | response_format | object | false | 响应格式，设置为 `{type: "json_object"}` |
 | stream | boolean | false | 是否流式响应 |
 

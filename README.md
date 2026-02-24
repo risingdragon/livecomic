@@ -14,7 +14,7 @@
 *   **前端**：React 18 + TypeScript + Vite + TailwindCSS
 *   **状态管理**：Zustand (持久化存储)
 *   **AI 模型**：
-    *   **LLM**：阿里云百炼千问 (Qwen-Plus) - 负责剧情生成和视觉描述
+    *   **LLM**：阿里云百炼千问 (qwen-turbo) - 负责剧情生成和视觉描述
     *   **Image Gen**：阿里云百炼万相 (Wanx-v1) - 负责实时图像绘制
 
 ## 🛠️ 快速开始
