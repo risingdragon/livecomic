@@ -66,38 +66,52 @@ function App() {
         choices: response.choices
       });
 
-      // 4. Generate Image
-      addLog('info', 'Generating image...', { prompt: response.visual_prompt });
+      // 4. Check if AI response contains error message
+      const hasError = response.text && (
+        response.text.includes('Data corruption detected') ||
+        response.text.includes('Retrying stream') ||
+        response.text.includes('CRITICAL ERROR') ||
+        response.text.includes('Connection lost') ||
+        response.text.includes('系统错误') ||
+        response.text.includes('错误')
+      );
 
-      try {
-        const imageUrl = useCustomAPI
-          ? await generateImageUrl(response.visual_prompt, undefined, customAPIConfig)
-          : await generateImageUrl(response.visual_prompt, apiKey);
+      // 5. Generate Image only if no error
+      if (!hasError) {
+        addLog('info', 'Generating image...', { prompt: response.visual_prompt });
 
-        addLog('info', 'Image generation result', {
-          url: imageUrl,
-          source: useCustomAPI ? 'custom' : 'preset'
-        });
+        try {
+          const imageUrl = useCustomAPI
+            ? await generateImageUrl(response.visual_prompt, undefined, customAPIConfig)
+            : await generateImageUrl(response.visual_prompt, apiKey);
 
-        setImage(imageUrl, response.visual_prompt);
-      } catch (imgError) {
-        const errorMsg = String(imgError);
-        console.error('Image generation failed:', imgError);
-
-        // 检查是否是 API 不支持图像生成
-        if (errorMsg.includes('could not generate an image') ||
-            errorMsg.includes('not supported') ||
-            errorMsg.includes('image generation') ||
-            errorMsg.includes('bad_response_body')) {
-          addLog('warning', '当前 API 不支持图像生成，继续文字游戏', { error: errorMsg });
-          // 使用一个占位图片或保持当前图片
-          addMessage({
-            role: 'system',
-            content: '[系统：当前 API 不支持图像生成，继续纯文字冒险]'
+          addLog('info', 'Image generation result', {
+            url: imageUrl,
+            source: useCustomAPI ? 'custom' : 'preset'
           });
-        } else {
-          addLog('error', 'Image generation failed', { error: errorMsg });
+
+          setImage(imageUrl, response.visual_prompt);
+        } catch (imgError) {
+          const errorMsg = String(imgError);
+          console.error('Image generation failed:', imgError);
+
+          // 检查是否是 API 不支持图像生成
+          if (errorMsg.includes('could not generate an image') ||
+              errorMsg.includes('not supported') ||
+              errorMsg.includes('image generation') ||
+              errorMsg.includes('bad_response_body')) {
+            addLog('warning', '当前 API 不支持图像生成，继续文字游戏', { error: errorMsg });
+            // 使用一个占位图片或保持当前图片
+            addMessage({
+              role: 'system',
+              content: '[系统：当前 API 不支持图像生成，继续纯文字冒险]'
+            });
+          } else {
+            addLog('error', 'Image generation failed', { error: errorMsg });
+          }
         }
+      } else {
+        addLog('warning', 'AI returned error message, skipping image generation', { error: response.text.substring(0, 100) });
       }
 
     } catch (error) {
