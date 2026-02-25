@@ -18,7 +18,8 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     setCustomAPIConfig,
     useCustomAPI,
     setUseCustomAPI,
-    addLog
+    addLog,
+    resetGame
   } = useGameStore();
 
   const [activeTab, setActiveTab] = useState<SettingsTab>(useCustomAPI ? 'custom' : 'preset');
@@ -71,7 +72,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   // Validate custom API config
   const isCustomConfigValid = () => {
     const isChatValid = customChatBaseUrl.trim() && customChatApiKey.trim() && customChatModel.trim();
-    const isImageValid = useSeparateImage ? 
+    const isImageValid = useSeparateImage ?
       (customImageBaseUrl.trim() && customImageApiKey.trim() && customImageModel.trim()) : true;
     return isChatValid && isImageValid;
   };
@@ -140,7 +141,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     return 'Aliyun DashScope API Key';
   };
 
-  const hasAnyConfig = apiKey || 
+  const hasAnyConfig = apiKey ||
     (customAPIConfig?.chat?.baseUrl && customAPIConfig?.chat?.apiKey) ||
     (customAPIConfig?.image?.baseUrl && customAPIConfig?.image?.apiKey);
 
@@ -163,22 +164,20 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
         <div className="flex gap-2 mb-6 bg-gray-800 p-1 rounded">
           <button
             onClick={() => setActiveTab('preset')}
-            className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded font-mono text-sm transition-all ${
-              activeTab === 'preset'
-                ? 'bg-green-900/50 text-green-400 border border-green-900/50'
-                : 'text-gray-400 hover:text-gray-200'
-            }`}
+            className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded font-mono text-sm transition-all ${activeTab === 'preset'
+              ? 'bg-green-900/50 text-green-400 border border-green-900/50'
+              : 'text-gray-400 hover:text-gray-200'
+              }`}
           >
             <Key size={14} />
             预设平台
           </button>
           <button
             onClick={() => setActiveTab('custom')}
-            className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded font-mono text-sm transition-all ${
-              activeTab === 'custom'
-                ? 'bg-blue-900/50 text-blue-400 border border-blue-900/50'
-                : 'text-gray-400 hover:text-gray-200'
-            }`}
+            className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded font-mono text-sm transition-all ${activeTab === 'custom'
+              ? 'bg-blue-900/50 text-blue-400 border border-blue-900/50'
+              : 'text-gray-400 hover:text-gray-200'
+              }`}
           >
             <Server size={14} />
             自定义 API
@@ -222,7 +221,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                 <Server size={14} />
                 CHAT_API_CONFIGURATION
               </h3>
-              
+
               <div>
                 <label className="block text-xs font-mono text-gray-500 mb-2 uppercase">
                   Base URL
@@ -286,7 +285,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                   使用单独的图像 API
                 </label>
               </div>
-              
+
               <div className={useSeparateImage ? '' : 'opacity-50 pointer-events-none'}>
                 <div>
                   <label className="block text-xs font-mono text-gray-500 mb-2 uppercase">
@@ -333,7 +332,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                   </p>
                 </div>
               </div>
-              
+
               {!useSeparateImage && (
                 <div className="text-xs text-gray-500 mt-2">
                   未选择单独的图像 API，将使用聊天 API 配置
@@ -354,17 +353,27 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
           </div>
         )}
 
-        {/* Clear Button */}
-        {hasAnyConfig && (
-          <div className="mt-6 pt-4 border-t border-gray-800">
+        {/* Game Controls */}
+        <div className="mt-6 pt-4 border-t border-gray-800 space-y-2">
+          <button
+            onClick={() => {
+              resetGame();
+              addLog('success', 'Game reset successfully');
+              onClose();
+            }}
+            className="w-full px-4 py-2 bg-yellow-900/20 hover:bg-yellow-900/40 text-yellow-400 border border-yellow-900/50 rounded font-mono text-sm transition-all"
+          >
+            RESTART_GAME
+          </button>
+          {hasAnyConfig && (
             <button
               onClick={handleClear}
               className="w-full px-4 py-2 bg-red-900/20 hover:bg-red-900/40 text-red-400 border border-red-900/50 rounded font-mono text-sm transition-all"
             >
               CLEAR_ALL_CONFIGURATIONS
             </button>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Current Status */}
         <div className="mt-4 p-3 bg-gray-800/50 rounded border border-gray-700">
