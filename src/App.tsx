@@ -97,9 +97,9 @@ function App() {
 
           // 检查是否是 API 不支持图像生成
           if (errorMsg.includes('could not generate an image') ||
-              errorMsg.includes('not supported') ||
-              errorMsg.includes('image generation') ||
-              errorMsg.includes('bad_response_body')) {
+            errorMsg.includes('not supported') ||
+            errorMsg.includes('image generation') ||
+            errorMsg.includes('bad_response_body')) {
             addLog('warning', '当前 API 不支持图像生成，继续文字游戏', { error: errorMsg });
             // 使用一个占位图片或保持当前图片
             addMessage({
@@ -130,17 +130,16 @@ function App() {
     <div className="relative h-screen w-screen bg-game-bg overflow-hidden text-white font-mono">
       {/* Background: Full screen Image Display */}
       <div className="absolute inset-0">
-        <ImageDisplay 
-          imageUrl={currentImageUrl} 
-          isLoading={isProcessing} 
+        <ImageDisplay
+          imageUrl={currentImageUrl}
+          isLoading={isProcessing}
         />
       </div>
 
       {/* Desktop: Sliding Terminal Panel */}
-      <div 
-        className={`hidden md:block fixed top-0 right-0 h-full z-20 transition-transform duration-300 ease-in-out ${
-          isTerminalVisible ? 'translate-x-0' : 'translate-x-full'
-        }`}
+      <div
+        className={`hidden md:block fixed top-0 right-0 h-full z-20 transition-transform duration-300 ease-in-out ${isTerminalVisible ? 'translate-x-0' : 'translate-x-full'
+          }`}
         style={{ width: '30%', minWidth: '300px' }}
       >
         {/* Toggle Button */}
@@ -155,10 +154,10 @@ function App() {
 
         {/* Terminal Panel */}
         <div className="h-full bg-black/80 backdrop-blur-sm border-l border-gray-700">
-          <Terminal 
-            history={history} 
+          <Terminal
+            history={history}
             logs={logs}
-            onSendMessage={handleSendMessage} 
+            onSendMessage={handleSendMessage}
             isProcessing={isProcessing}
             onOpenSettings={() => setIsSettingsOpen(true)}
           />
@@ -166,11 +165,10 @@ function App() {
       </div>
 
       {/* Mobile: Overlay Terminal Panel */}
-      <div 
-        className={`md:hidden fixed bottom-0 left-0 right-0 z-20 transition-transform duration-300 ease-in-out ${
-          isTerminalVisible ? 'translate-y-0' : 'translate-y-full'
-        }`}
-        style={{ height: '35vh' }}
+      <div
+        className={`md:hidden fixed bottom-0 left-0 right-0 z-20 transition-transform duration-300 ease-in-out ${isTerminalVisible ? 'translate-y-0' : 'translate-y-full'
+          }`}
+        style={{ height: '60vh' }}
       >
         {/* Toggle Button */}
         <button
@@ -184,19 +182,19 @@ function App() {
 
         {/* Terminal Panel */}
         <div className="h-full bg-black/70 backdrop-blur-sm border-t border-gray-700">
-          <Terminal 
-            history={history} 
+          <Terminal
+            history={history}
             logs={logs}
-            onSendMessage={handleSendMessage} 
+            onSendMessage={handleSendMessage}
             isProcessing={isProcessing}
             onOpenSettings={() => setIsSettingsOpen(true)}
           />
         </div>
       </div>
 
-      <SettingsModal 
-        isOpen={isSettingsOpen} 
-        onClose={() => setIsSettingsOpen(false)} 
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
       />
     </div>
   );

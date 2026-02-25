@@ -44,7 +44,7 @@ export function Terminal({ history, logs, onSendMessage, isProcessing, onOpenSet
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-2 bg-gray-900/80 border-b border-gray-800 text-green-500">
         <div className="flex gap-4">
-          <button 
+          <button
             onClick={() => setActiveTab('chat')}
             className={cn(
               "flex items-center gap-2 px-2 py-1 rounded transition-colors",
@@ -52,9 +52,9 @@ export function Terminal({ history, logs, onSendMessage, isProcessing, onOpenSet
             )}
           >
             <TerminalIcon size={14} />
-            TERMINAL
+            对话
           </button>
-          <button 
+          <button
             onClick={() => setActiveTab('logs')}
             className={cn(
               "flex items-center gap-2 px-2 py-1 rounded transition-colors",
@@ -62,49 +62,49 @@ export function Terminal({ history, logs, onSendMessage, isProcessing, onOpenSet
             )}
           >
             <Activity size={14} />
-            DEBUG_LOG
+            日志
           </button>
         </div>
         <div className="flex gap-2 items-center">
-           <button
-             onClick={onOpenSettings}
-             className="text-gray-500 hover:text-white transition-colors p-1"
-             title="Configure API Key"
-           >
-             <Settings size={14} />
-           </button>
-           <span className="text-xs opacity-50">{activeTab === 'chat' ? 'ONLINE' : 'MONITORING'}</span>
-           <span className={cn(
-             "w-2 h-2 rounded-full animate-pulse",
-             activeTab === 'chat' ? "bg-green-500" : "bg-yellow-500"
-           )}></span>
+          <button
+            onClick={onOpenSettings}
+            className="text-gray-500 hover:text-white transition-colors p-1"
+            title="Configure API Key"
+          >
+            <Settings size={14} />
+          </button>
+          <span className="text-xs opacity-50">{activeTab === 'chat' ? 'ONLINE' : 'MONITORING'}</span>
+          <span className={cn(
+            "w-2 h-2 rounded-full animate-pulse",
+            activeTab === 'chat' ? "bg-green-500" : "bg-yellow-500"
+          )}></span>
         </div>
       </div>
 
       {/* Output Area */}
-      <div 
+      <div
         ref={scrollRef}
         className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent"
       >
         {activeTab === 'chat' ? (
           <>
             <div className="text-gray-500 mb-4">
-              &gt; System initialized...<br/>
-              &gt; Connection established.<br/>
+              &gt; System initialized...<br />
+              &gt; Connection established.<br />
               &gt; Waiting for input...
             </div>
 
             {history.map((msg, idx) => (
               <div key={idx} className={cn(
                 "break-words",
-                msg.role === 'user' ? "text-blue-400" : 
-                msg.role === 'system' ? "text-yellow-400 italic" : "text-green-400"
+                msg.role === 'user' ? "text-blue-400" :
+                  msg.role === 'system' ? "text-yellow-400 italic" : "text-green-400"
               )}>
                 <span className="opacity-50 mr-2">
                   {msg.role === 'user' ? '>' : msg.role === 'system' ? '#' : '$'}
                 </span>
                 {msg.content}
-                
+
                 {/* Display choices if available and it's the latest assistant message */}
                 {msg.role === 'assistant' && msg.choices && idx === history.length - 1 && !isProcessing && (
                   <div className="mt-2 pl-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -121,7 +121,7 @@ export function Terminal({ history, logs, onSendMessage, isProcessing, onOpenSet
                 )}
               </div>
             ))}
-            
+
             {isProcessing && (
               <div className="text-gray-500 animate-pulse">
                 &gt; Processing input...
@@ -130,26 +130,26 @@ export function Terminal({ history, logs, onSendMessage, isProcessing, onOpenSet
           </>
         ) : (
           <div className="space-y-2 font-mono text-xs">
-             {logs.length === 0 && <div className="text-gray-600 italic">No logs recorded yet.</div>}
-             {logs.map((log, idx) => (
-               <div key={idx} className="border-b border-gray-800 pb-2 mb-2 last:border-0">
-                 <div className="flex gap-2 text-gray-500 mb-1">
-                   <span>[{formatTime(log.timestamp)}]</span>
-                   <span className={cn(
-                     "uppercase font-bold",
-                     log.type === 'info' ? "text-blue-400" :
-                     log.type === 'success' ? "text-green-400" :
-                     log.type === 'warning' ? "text-yellow-400" : "text-red-400"
-                   )}>{log.type}</span>
-                 </div>
-                 <div className="text-gray-300 break-words">{log.message}</div>
-                 {log.details && (
-                   <pre className="mt-1 p-2 bg-gray-900 rounded text-gray-500 overflow-x-auto text-[10px]">
-                     {JSON.stringify(log.details, null, 2)}
-                   </pre>
-                 )}
-               </div>
-             ))}
+            {logs.length === 0 && <div className="text-gray-600 italic">No logs recorded yet.</div>}
+            {logs.map((log, idx) => (
+              <div key={idx} className="border-b border-gray-800 pb-2 mb-2 last:border-0">
+                <div className="flex gap-2 text-gray-500 mb-1">
+                  <span>[{formatTime(log.timestamp)}]</span>
+                  <span className={cn(
+                    "uppercase font-bold",
+                    log.type === 'info' ? "text-blue-400" :
+                      log.type === 'success' ? "text-green-400" :
+                        log.type === 'warning' ? "text-yellow-400" : "text-red-400"
+                  )}>{log.type}</span>
+                </div>
+                <div className="text-gray-300 break-words">{log.message}</div>
+                {log.details && (
+                  <pre className="mt-1 p-2 bg-gray-900 rounded text-gray-500 overflow-x-auto text-[10px]">
+                    {JSON.stringify(log.details, null, 2)}
+                  </pre>
+                )}
+              </div>
+            ))}
           </div>
         )}
       </div>
@@ -167,8 +167,8 @@ export function Terminal({ history, logs, onSendMessage, isProcessing, onOpenSet
             className="flex-1 bg-transparent text-gray-200 placeholder-gray-600 focus:outline-none py-2"
             autoFocus
           />
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             disabled={!input.trim() || isProcessing}
             className="text-gray-400 hover:text-white disabled:opacity-50"
           >
@@ -176,13 +176,13 @@ export function Terminal({ history, logs, onSendMessage, isProcessing, onOpenSet
           </button>
         </form>
       )}
-      
+
       {/* Log Controls (Only for logs) */}
       {activeTab === 'logs' && (
         <div className="p-2 bg-gray-900/80 border-t border-gray-800 flex justify-end">
-           <div className="text-xs text-gray-500 px-2">
-             Auto-scrolling enabled
-           </div>
+          <div className="text-xs text-gray-500 px-2">
+            Auto-scrolling enabled
+          </div>
         </div>
       )}
     </div>
