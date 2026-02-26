@@ -85,7 +85,7 @@ const getChatModelConfig = (
   return {
     provider: 'dashscope',
     chatModel: 'qwen-turbo',
-    imageModel: 'wanx-v1',
+    imageModel: 'wanx2.0-t2i-turbo',
     baseUrl: `${origin}/dashscope-api/compatible-mode/v1`,
     apiKey: userKey || import.meta.env.VITE_DASHSCOPE_API_KEY || import.meta.env.VITE_OPENAI_API_KEY || ''
   };
@@ -143,7 +143,7 @@ const getImageModelConfig = (
   return {
     provider: 'dashscope',
     chatModel: 'qwen-turbo',
-    imageModel: 'wanx-v1',
+    imageModel: 'wanx2.0-t2i-turbo',
     baseUrl: `${origin}/dashscope-api`,
     apiKey: userKey || import.meta.env.VITE_DASHSCOPE_API_KEY || import.meta.env.VITE_OPENAI_API_KEY || ''
   };
@@ -174,7 +174,7 @@ export async function chatWithAI(
     let mockVisual = "A digital void with glowing grid lines, cyberpunk style, dark atmosphere";
 
     if (lastUserMsg.includes("look")) {
-        mockText = "I see endless possibilities, but my sensors are offline. (Please set API Key)";
+      mockText = "I see endless possibilities, but my sensors are offline. (Please set API Key)";
     }
 
     return {
@@ -270,7 +270,7 @@ async function generateDashScopeImage(prompt: string, apiKey: string, baseUrl: s
       "X-DashScope-Async": "enable"
     },
     body: JSON.stringify({
-      model: "wanx-v1",
+      model: "wanx2.0-t2i-turbo",
       input: {
         prompt: prompt + ", 2d game art, high quality"
       },
@@ -285,32 +285,32 @@ async function generateDashScopeImage(prompt: string, apiKey: string, baseUrl: s
   const data = await response.json();
 
   if (data.output && data.output.task_id) {
-      const taskId = data.output.task_id;
-      let taskStatus = 'PENDING';
-      let attempts = 0;
+    const taskId = data.output.task_id;
+    let taskStatus = 'PENDING';
+    let attempts = 0;
 
-      while (taskStatus === 'PENDING' || taskStatus === 'RUNNING') {
-          if (attempts > 30) throw new Error("Image generation timeout");
+    while (taskStatus === 'PENDING' || taskStatus === 'RUNNING') {
+      if (attempts > 30) throw new Error("Image generation timeout");
 
-          await new Promise(r => setTimeout(r, 1000));
+      await new Promise(r => setTimeout(r, 1000));
 
-          const taskResponse = await fetch(`${baseUrl}/api/v1/tasks/${taskId}`, {
-              headers: { "Authorization": `Bearer ${apiKey}` }
-          });
-          const taskData = await taskResponse.json();
+      const taskResponse = await fetch(`${baseUrl}/api/v1/tasks/${taskId}`, {
+        headers: { "Authorization": `Bearer ${apiKey}` }
+      });
+      const taskData = await taskResponse.json();
 
-          if (taskData.output && taskData.output.task_status) {
-              taskStatus = taskData.output.task_status;
-              if (taskStatus === 'SUCCEEDED') {
-                  const resultUrl = taskData.output.results[0].url;
-                  console.log("Raw Image URL from API:", resultUrl);
-                  return resultUrl;
-              }
-          }
-          attempts++;
+      if (taskData.output && taskData.output.task_status) {
+        taskStatus = taskData.output.task_status;
+        if (taskStatus === 'SUCCEEDED') {
+          const resultUrl = taskData.output.results[0].url;
+          console.log("Raw Image URL from API:", resultUrl);
+          return resultUrl;
+        }
       }
+      attempts++;
+    }
   } else if (data.code) {
-      throw new Error(`DashScope Error: ${data.message}`);
+    throw new Error(`DashScope Error: ${data.message}`);
   }
 
   throw new Error("Failed to start image generation task");

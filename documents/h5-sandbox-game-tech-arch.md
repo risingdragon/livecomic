@@ -37,7 +37,7 @@ graph TD
 - **前端**：React@18 + TailwindCSS@3 + Vite
 - **初始化工具**：vite-init
 - **后端**：无后端服务，直接调用LLM和图像生成API
-- **AI集成**：阿里云百炼千问(Qwen) API + 百炼万相(wanx-v1)图像生成API
+- **AI集成**：阿里云百炼千问(Qwen) API + 百炼万相(wanx2.0-t2i-turbo)图像生成API
 - **状态管理**：localStorage保存对话历史和生成的图像URL
 
 ## 3. 路由定义
@@ -86,7 +86,7 @@ AI回复必须包含以下JSON结构：
 | choices | array | AI回复选择 |
 | usage | object | Token使用量 |
 
-**图像生成API（百炼万相wanx-v1）**
+**图像生成API（百炼万相wanx2.0-t2i-turbo）**
 ```
 POST https://dashscope.aliyuncs.com/api/v1/services/aigc/text2image/image-synthesis
 ```
@@ -96,7 +96,7 @@ POST https://dashscope.aliyuncs.com/api/v1/services/aigc/text2image/image-synthe
 请求：
 | 参数名 | 参数类型 | 是否必需 | 描述 |
 |-----------|-------------|-------------|-------------|
-| model | string | true | 模型名称（wanx-v1） |
+| model | string | true | 模型名称（wanx2.0-t2i-turbo） |
 | input.prompt | string | true | 场景描述文本 |
 | parameters.style | string | false | 图像风格（默认auto） |
 | parameters.size | string | false | 图像尺寸（默认1280*720） |

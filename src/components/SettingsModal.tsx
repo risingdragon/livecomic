@@ -153,7 +153,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-mono text-green-500 flex items-center gap-2">
             <Key size={20} />
-            ACCESS_CONFIGURATION
+            配置
           </h2>
           <button onClick={onClose} className="text-gray-500 hover:text-white transition-colors">
             <X size={20} />
