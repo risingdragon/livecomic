@@ -85,7 +85,7 @@ const getChatModelConfig = (
   return {
     provider: 'dashscope',
     chatModel: 'qwen-turbo',
-    imageModel: 'wanx2.0-t2i-turbo',
+    imageModel: 'wanx2.1-t2i-turbo',
     baseUrl: `${origin}/dashscope-api/compatible-mode/v1`,
     apiKey: userKey || import.meta.env.VITE_DASHSCOPE_API_KEY || import.meta.env.VITE_OPENAI_API_KEY || ''
   };
@@ -143,7 +143,7 @@ const getImageModelConfig = (
   return {
     provider: 'dashscope',
     chatModel: 'qwen-turbo',
-    imageModel: 'wanx2.0-t2i-turbo',
+    imageModel: 'wanx2.1-t2i-turbo',
     baseUrl: `${origin}/dashscope-api`,
     apiKey: userKey || import.meta.env.VITE_DASHSCOPE_API_KEY || import.meta.env.VITE_OPENAI_API_KEY || ''
   };
@@ -270,7 +270,7 @@ async function generateDashScopeImage(prompt: string, apiKey: string, baseUrl: s
       "X-DashScope-Async": "enable"
     },
     body: JSON.stringify({
-      model: "wanx2.0-t2i-turbo",
+      model: "wanx2.1-t2i-turbo",
       input: {
         prompt: prompt + ", 2d game art, high quality"
       },
